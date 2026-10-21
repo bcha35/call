@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Call</title>
+<style>
+:root { --bg: #f3f5f4; --ink: #14201c; --muted: #5d6b66; --call: #0f7a4f; --call-ink: #fff; color-scheme: light }
+@media (prefers-color-scheme: dark) { :root { --bg: #0f1614; --ink: #e6eeeb; --muted: #93a39d; --call: #2fb57c; --call-ink: #06140e; color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: grid; place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) }
+main { width: 100%; max-width: 420px; display: grid; gap: 16px; text-align: center }
+p { margin: 0; color: var(--muted) }
+a.call { display: block; padding: 20px; border-radius: 14px; background: var(--call); color: var(--call-ink); text-decoration: none; font-weight: 600; font-size: 22px; font-variant-numeric: tabular-nums }
+a.back { color: var(--muted); font-size: 14px }
+</style>
+</head>
+<body>
+<main>
+  <p id="msg">Opening your Phone app…</p>
+  <a class="call" id="call" href="#" hidden>Call</a>
+  <a class="back" href="https://claude.ai/artifact/6ei55f7zNfUBUw4STfdqpk">Back to dialer</a>
+</main>
+<script>
+// Reads "#+1XXXXXXXXXX" (or "?n=+1XXXXXXXXXX", used by spreadsheet links) and hands it to the phone's dialer.
+// The dialer uses the hash form, which browsers never send to the server.
+function parseNumber(hash) {
+  var n = decodeURIComponent(String(hash || "").replace(/^#/, "")).replace(/[^\d+]/g, "");
+  if (/^\d{10}$/.test(n)) n = "+1" + n;
+  return /^\+1\d{10}$/.test(n) ? n : null;
+}
+function pretty(n) { var d = n.slice(2); return "(" + d.slice(0, 3) + ") " + d.slice(3, 6) + "-" + d.slice(6); }
+(function () {
+  var q = (location.search.match(/[?&]n=([^&]*)/) || [])[1];
+  var n = parseNumber(location.hash) || parseNumber(q), msg = document.getElementById("msg"), btn = document.getElementById("call");
+  if (!n) { msg.textContent = "No number in this link."; return; }
+  btn.href = "tel:" + n;
+  btn.textContent = "Call " + pretty(n);
+  btn.hidden = false;
+  msg.textContent = "If your Phone app didn't open, tap below.";
+  location.href = "tel:" + n;
+})();
+</script>
+</body>
+</html>
